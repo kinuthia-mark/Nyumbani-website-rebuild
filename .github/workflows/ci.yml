@@ -82,6 +82,50 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/admin/admin.php)
           test "$code" = "302"
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Drives the admin in a real browser: publish, upload, delete, read
+      # messages, and checks that forged or GET-based actions are refused.
+      - name: Browser test of the admin panel
+        env:
+          BASE_URL: http://127.0.0.1:8080
+          MYSQL_CMD: mysql -h 127.0.0.1 -uroot -pci-root nyumbani_db
+          SCREENSHOTS_DIR: e2e-screenshots
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+          python tests/e2e/admin_flow.py
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: e2e-screenshots/
+          if-no-files-found: ignore
+
       - name: Server log
         if: always()
         run: cat server.log
+
+  docker:
+    name: Docker Compose stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start
+        run: docker compose up -d --build --wait
+      - name: Pages load from the containers
+        run: |
+          curl -fs http://localhost:8080/index.php | grep -q "Nyumbani"
+          curl -fs http://localhost:8080/blog.php > /dev/null
+          curl -fs http://localhost:8080/admin/login.php | grep -qi "sign in"
+      - name: Uploaded scripts are not executed
+        run: |
+          docker compose exec -T web sh -c 'echo "<?php echo 6*7;" > /var/www/html/uploads/gallery/x.php'
+          ! curl -fs http://localhost:8080/uploads/gallery/x.php | grep -q 42
+      - name: Logs
+        if: always()
+        run: docker compose logs
