@@ -4,19 +4,20 @@ if (!isset($_SESSION['admin_logged_in'])) { header("Location: login.php"); exit;
 include 'db.php';
 include 'helpers.php';
 require_admin();
-if (isset($_GET['delete']) || isset($_GET['publish_id']) || isset($_GET['read'])) { csrf_check(); }
+// Every POST on this page (create, publish, delete, mark as read) must carry the CSRF token.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
 // --- HANDLE ACTIONS ---
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
+if (isset($_POST['delete'])) {
+    $id = (int)$_POST['delete'];
     mysqli_query($conn, "DELETE FROM messages WHERE id = $id");
-    header("Location: manage_messages.php");
+    header("Location: manage_messages.php"); exit;
 }
 
-if (isset($_GET['read'])) {
-    $id = (int)$_GET['read'];
+if (isset($_POST['read'])) {
+    $id = (int)$_POST['read'];
     mysqli_query($conn, "UPDATE messages SET status = 'read' WHERE id = $id");
-    header("Location: manage_messages.php");
+    header("Location: manage_messages.php"); exit;
 }
 ?>
 <!DOCTYPE html>
@@ -86,9 +87,9 @@ if (isset($_GET['read'])) {
 
                     <div class="actions">
                         <?php if($msg['status'] == 'unread'): ?>
-                            <a href="?read=<?php echo $msg['id']; ?>&t=<?php echo csrf_token(); ?>" class="btn-read btn-sm">Mark as Read</a>
+                            <?php echo action_button(['read' => $msg['id']], 'Mark as Read', 'btn-read btn-sm', '', ''); ?>
                         <?php endif; ?>
-                        <a href="?delete=<?php echo $msg['id']; ?>&t=<?php echo csrf_token(); ?>" class="btn-delete btn-sm" onclick="return confirm('Delete this message?')">Delete</a>
+                        <?php echo action_button(['delete' => $msg['id']], 'Delete', 'btn-delete btn-sm', '', 'Delete this message?'); ?>
                     </div>
                 </div>
             <?php endwhile; 

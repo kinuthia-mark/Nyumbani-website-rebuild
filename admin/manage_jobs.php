@@ -4,11 +4,12 @@ if (!isset($_SESSION['admin_logged_in'])) { header("Location: login.php"); exit;
 include 'db.php';
 include 'helpers.php';
 require_admin();
-if (isset($_GET['delete']) || isset($_GET['publish_id']) || isset($_GET['read'])) { csrf_check(); }
+// Every POST on this page (create, publish, delete, mark as read) must carry the CSRF token.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
 // Handle Deletion
-if(isset($_GET['delete'])){
-    $id = (int)$_GET['delete'];
+if(isset($_POST['delete'])){
+    $id = (int)$_POST['delete'];
     mysqli_query($conn, "DELETE FROM job_openings WHERE id = $id");
     header("Location: manage_jobs.php");
     exit;
@@ -55,6 +56,7 @@ if (isset($_POST['add_job'])) {
         <div class="admin-card">
             <h2><i class="fas fa-plus-circle"></i> Post a New Job</h2>
             <form method="POST">
+                        <input type="hidden" name="t" value="<?php echo e(csrf_token()); ?>">
                 <input type="text" name="title" placeholder="Job Title (e.g. Registered Nurse)" required>
                 <input type="text" name="location" placeholder="Location (e.g. Karen, Nairobi)" required>
                 <select name="job_type">
@@ -84,9 +86,7 @@ if (isset($_POST['add_job'])) {
                         <strong style='font-size: 16px; color: #062269;'>".e($row['title'])."</strong><br>
                         <small style='color: #666;'>".e($row['location'])." | ".e($row['job_type'])." (Category: ".e($row['category']).")</small>
                     </div>
-                    <a href='?delete=".$row['id']."&t=".csrf_token()."' style='color:#e74c3c; font-size: 18px;' onclick='return confirm(\"Delete this job?\")'>
-                        <i class='fas fa-trash'></i>
-                    </a>
+                    ".action_button(['delete' => $row['id']], "<i class='fas fa-trash'></i>", 'icon-action', 'color:#e74c3c; font-size: 18px;', 'Delete this job?')."
                   </div>";
         }
         ?>

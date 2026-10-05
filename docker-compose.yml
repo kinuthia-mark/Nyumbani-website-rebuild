@@ -1,0 +1,38 @@
+# Run the site and its database:  docker compose up --build
+# Site: http://localhost:8080   Admin: http://localhost:8080/admin/login.php
+# (starter login admin / ChangeMe123! - change it straight away)
+services:
+  web:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST: db
+      DB_USER: nyumbani
+      DB_PASSWORD: ${DB_PASSWORD:-nyumbani-local}
+      DB_NAME: nyumbani_db
+    volumes:
+      - uploads:/var/www/html/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mariadb:10.11
+    environment:
+      MARIADB_DATABASE: nyumbani_db
+      MARIADB_USER: nyumbani
+      MARIADB_PASSWORD: ${DB_PASSWORD:-nyumbani-local}
+      MARIADB_RANDOM_ROOT_PASSWORD: "1"
+    volumes:
+      - db:/var/lib/mysql
+      # Imported automatically the first time the database volume is created.
+      - ./database/nyumbani_db.sql:/docker-entrypoint-initdb.d/nyumbani_db.sql:ro
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      retries: 30
+
+volumes:
+  db:
+  uploads:

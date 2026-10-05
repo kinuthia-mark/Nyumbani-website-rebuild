@@ -2,10 +2,11 @@
 // Database settings. Defaults suit a local XAMPP install.
 // For production, copy config.example.php to config.local.php and put the real values there
 // (config.local.php is git-ignored so passwords never reach GitHub).
-$servername = 'localhost';
-$username   = 'root';
-$password   = '';
-$dbname     = 'nyumbani_db';
+// Environment variables (used by Docker) win over the XAMPP defaults.
+$servername = getenv('DB_HOST') ?: 'localhost';
+$username   = getenv('DB_USER') ?: 'root';
+$password   = getenv('DB_PASSWORD') ?: '';
+$dbname     = getenv('DB_NAME') ?: 'nyumbani_db';
 
 if (file_exists(__DIR__ . '/config.local.php')) {
     include __DIR__ . '/config.local.php';

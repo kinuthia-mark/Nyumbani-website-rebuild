@@ -4,7 +4,8 @@ if (!isset($_SESSION['admin_logged_in'])) { header("Location: login.php"); exit;
 include 'db.php';
 include 'helpers.php';
 require_admin();
-if (isset($_GET['delete']) || isset($_GET['publish_id']) || isset($_GET['read'])) { csrf_check(); }
+// Every POST on this page (create, publish, delete, mark as read) must carry the CSRF token.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
 // --- HANDLE UPLOAD (Draft or Publish) ---
 if (isset($_POST['save_newsletter'])) {
@@ -22,23 +23,23 @@ if (isset($_POST['save_newsletter'])) {
         $stmt = mysqli_prepare($conn, "INSERT INTO newsletters (title, description, publish_date, pdf_path, thumbnail_path, status, uploaded_by) VALUES (?, ?, ?, ?, ?, ?, ?)");
         mysqli_stmt_bind_param($stmt, 'sssssss', $title, $desc, $p_date, $pdf_db, $thumb_db, $status, $uploader);
         mysqli_stmt_execute($stmt);
-        header("Location: manage_newsletters.php?success=1");
+        header("Location: manage_newsletters.php?success=1"); exit;
     } else {
         delete_upload($pdf_db);      // don't leave half-uploaded files behind
         delete_upload($thumb_db);
-        header("Location: manage_newsletters.php?error=upload");
+        header("Location: manage_newsletters.php?error=upload"); exit;
     }
     exit;
 }
 
 // --- QUICK PUBLISH & DELETE ---
-if (isset($_GET['publish_id'])) {
-    $id = (int)$_GET['publish_id'];
+if (isset($_POST['publish_id'])) {
+    $id = (int)$_POST['publish_id'];
     mysqli_query($conn, "UPDATE newsletters SET status = 'published' WHERE id = $id");
-    header("Location: manage_newsletters.php?updated=1");
+    header("Location: manage_newsletters.php?updated=1"); exit;
 }
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
+if (isset($_POST['delete'])) {
+    $id = (int)$_POST['delete'];
     $res = mysqli_query($conn, "SELECT pdf_path, thumbnail_path FROM newsletters WHERE id = $id");
     $files = mysqli_fetch_assoc($res);
     if ($files) { 
@@ -112,6 +113,7 @@ $all_news_query = mysqli_query($conn, "SELECT * FROM newsletters ORDER BY publis
                 <div class="admin-card">
                     <h2><i class="fas fa-edit"></i> Create Newsletter</h2>
                     <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="t" value="<?php echo e(csrf_token()); ?>">
                         <input type="hidden" name="status" id="postStatus" value="draft">
                         <div style="display:flex; flex-direction:column; gap:15px;">
                             <label>Newsletter Title</label>
@@ -162,8 +164,8 @@ $all_news_query = mysqli_query($conn, "SELECT * FROM newsletters ORDER BY publis
                         <h4 class="mc-title"><?php echo htmlspecialchars($news['title']); ?></h4>
                     </div>
                     <div class="mc-actions">
-                        <a href="?publish_id=<?php echo $news['id']; ?>&t=<?php echo csrf_token(); ?>" class="mc-btn mc-btn-go-live"><i class="fas fa-rocket"></i> Go Live</a>
-                        <a href="?delete=<?php echo $news['id']; ?>&t=<?php echo csrf_token(); ?>" class="mc-btn mc-btn-delete" onclick="return confirm('Delete permanently?')"><i class="fas fa-trash"></i> Delete</a>
+                        <?php echo action_button(['publish_id' => $news['id']], '<i class="fas fa-rocket"></i> Go Live', 'mc-btn mc-btn-go-live', '', ''); ?>
+                        <?php echo action_button(['delete' => $news['id']], '<i class="fas fa-trash"></i> Delete', 'mc-btn mc-btn-delete', '', 'Delete permanently?'); ?>
                     </div>
                 </div>
             <?php endif; endwhile; ?>
@@ -187,7 +189,7 @@ $all_news_query = mysqli_query($conn, "SELECT * FROM newsletters ORDER BY publis
                     </div>
                     <div class="mc-actions">
                         <a href="../<?php echo $news['pdf_path']; ?>" target="_blank" class="mc-btn" style="background:#eee; color:#333;">View PDF</a>
-                        <a href="?delete=<?php echo $news['id']; ?>&t=<?php echo csrf_token(); ?>" class="mc-btn mc-btn-delete" onclick="return confirm('Retract this newsletter?')"><i class="fas fa-trash"></i> Retract</a>
+                        <?php echo action_button(['delete' => $news['id']], '<i class="fas fa-trash"></i> Retract', 'mc-btn mc-btn-delete', '', 'Retract this newsletter?'); ?>
                     </div>
                 </div>
             <?php endif; endwhile; ?>

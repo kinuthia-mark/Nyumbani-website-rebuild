@@ -5,6 +5,31 @@ A PHP and MySQL website for **Nyumbani Children's Home and the Children of God R
 [![CI](https://github.com/kinuthia-mark/Nyumbani-website-rebuild/actions/workflows/ci.yml/badge.svg)](https://github.com/kinuthia-mark/Nyumbani-website-rebuild/actions/workflows/ci.yml)
 ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)
 ![MariaDB](https://img.shields.io/badge/MariaDB-10.4-003545?logo=mariadb&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
+![Playwright](https://img.shields.io/badge/tested%20with-Playwright-2EAD33?logo=playwright&logoColor=white)
+
+![Nyumbani home page](docs/screenshots/index.png)
+
+## Screenshots
+
+| Blog | Admin: create a post |
+|---|---|
+| ![Blog page](docs/screenshots/blog.png) | ![Admin blog editor](docs/screenshots/admin-blog.png) |
+| **Gallery** | **Careers** |
+| ![Gallery](docs/screenshots/gallery.png) | ![Careers](docs/screenshots/careers.png) |
+
+<details>
+<summary>More: programmes, resources, donate, contact, admin dashboard, mobile</summary>
+
+| | |
+|---|---|
+| ![Programmes](docs/screenshots/programs.png) | ![Resources](docs/screenshots/resources.png) |
+| ![Donate](docs/screenshots/donate.png) | ![Contact](docs/screenshots/contact.png) |
+| ![Admin dashboard](docs/screenshots/admin-dashboard.png) | <img src="docs/screenshots/home-mobile.png" alt="Home page on a phone" width="260"> |
+
+</details>
+
+Screenshots were taken by the automated browser test, so the blog posts, jobs and gallery captions in them are sample content entered by the test.
 
 
 ## Table of Contents
@@ -17,7 +42,7 @@ A PHP and MySQL website for **Nyumbani Children's Home and the Children of God R
 6. [Database Schema](#database-schema)
 7. [Tech Stack](#tech-stack)
 8. [Project Structure](#project-structure)
-9. [Getting Started](#getting-started)
+9. [Getting Started](#getting-started) (Docker or XAMPP)
 10. [Security](#security)
 11. [Automated Checks](#automated-checks)
 12. [Roadmap](#roadmap)
@@ -260,27 +285,46 @@ Nyumbani-website-rebuild/
 ├── header.php, footer.php    # Shared layout
 ├── css/style.css
 ├── images/                   # Logos and static photos
-├── uploads/                  # Admin-uploaded files (.htaccess blocks script execution)
+├── uploads/                  # Admin-uploaded files (.htaccess blocks script execution, contents git-ignored)
 ├── admin/
 │   ├── db.php                # Database connection (reads config.local.php if present)
 │   ├── config.example.php    # Template for production DB credentials
-│   ├── helpers.php           # Escaping, CSRF tokens, safe file uploads
+│   ├── helpers.php           # Escaping, CSRF tokens, action_button(), safe file uploads
 │   ├── login.php, login_process.php, logout.php
 │   ├── admin.php             # Dashboard
 │   ├── manage_*.php          # Content management screens
 │   └── blog_handler.php, gallery_handler.php, delete_photo.php
-└── database/
-    └── nyumbani_db.sql       # Schema and starter data
+├── database/
+│   └── nyumbani_db.sql       # Schema and starter data
+├── tests/e2e/admin_flow.py   # Playwright browser test of the admin panel
+├── docs/screenshots/         # Images used in this README
+├── Dockerfile                # PHP 8.2 + Apache + mysqli
+└── docker-compose.yml        # Site + MariaDB with named volumes
 ```
 
 ## Getting Started
 
-### Prerequisites
+### Quick start with Docker
+
+```bash
+git clone https://github.com/kinuthia-mark/Nyumbani-website-rebuild.git
+cd Nyumbani-website-rebuild
+docker compose up --build
+```
+
+- Site: <http://localhost:8080>
+- Admin: <http://localhost:8080/admin/login.php> (starter login `admin` / `ChangeMe123!`, change it straight away)
+
+Compose starts PHP 8.2 on Apache and MariaDB 10.11. The database is created from `database/nyumbani_db.sql` the first time, using a dedicated `nyumbani` database user rather than root. The database and uploaded files live in named volumes, so they survive restarts.
+
+### Local setup with XAMPP
+
+#### Prerequisites
 
 - [XAMPP](https://www.apachefriends.org/) (or any Apache + PHP 8.x + MariaDB/MySQL stack)
 - Git
 
-### Installation
+#### Installation
 
 1. **Clone the repository into your web root** (`htdocs` for XAMPP):
 
@@ -291,7 +335,9 @@ Nyumbani-website-rebuild/
 
 2. **Create the database.** Start Apache and MySQL in XAMPP, open phpMyAdmin, create an empty database named `nyumbani_db` (collation `utf8mb4_general_ci`), then import `database/nyumbani_db.sql` into it.
 
-3. **Check the connection settings.** The defaults in `admin/db.php` suit XAMPP (`root`, empty password, database `nyumbani_db`). For a live server, copy `admin/config.example.php` to `admin/config.local.php` and enter your real values; that file is git-ignored so your password is never uploaded.
+3. **Check the connection settings.** The defaults in `admin/db.php` suit XAMPP (`root`, empty password, database `nyumbani_db`). They can be overridden in two ways:
+   - environment variables `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME` (this is what Docker uses)
+   - `admin/config.local.php`: copy `admin/config.example.php` and enter your real values. The file is git-ignored, so your password is never uploaded.
 
 4. **Open the site** at `http://localhost/Nyumbani-website-rebuild/` and the admin panel at `http://localhost/Nyumbani-website-rebuild/admin/login.php`.
 
@@ -316,16 +362,17 @@ Upload folders are created automatically on first upload. On Linux hosting, make
 | XSS | Visitor and admin content is escaped with `htmlspecialchars()` before display (`e()` helper in the admin area) |
 | File uploads | Extension whitelist, real MIME type check, 10 MB limit, random file names; `uploads/.htaccess` blocks script execution |
 | Access control | Every admin page and handler calls `require_admin()` |
-| CSRF | Delete, publish and mark-as-read links carry a per-session token verified on the server |
-| Secrets | Production DB credentials go in `admin/config.local.php`, which is git-ignored |
+| CSRF | Every admin form (create, publish, delete, mark as read, upload) sends a per-session token, checked with `hash_equals()`. Requests without it get a 403 |
+| State-changing actions | Delete, publish and mark-as-read are POST forms built by `action_button()`, never plain links, so a crawler, a link preview or a reopened URL cannot trigger them |
+| Secrets | Production DB credentials come from environment variables or `admin/config.local.php`, which is git-ignored |
+| Uploaded files | Kept out of git by `.gitignore`; in Docker they live in their own volume. CI checks that a `.php` file dropped into `uploads/` is not executed |
 | Errors | Database errors are logged, not shown to visitors |
 
 **Still recommended before a large public launch**
 
 - Serve the site over HTTPS (then also enable `session.cookie_secure`)
-- Use a dedicated MySQL user with limited rights instead of `root`
+- Use a dedicated MySQL user with limited rights instead of `root` (the Docker setup already does)
 - Add stronger login attempt limiting (currently a 1-second delay on failure) and a password-reset flow if more staff are added
-- Move admin write actions from links to POST forms
 - Take regular backups of the database and the `uploads/` folder
 
 ## Automated Checks
@@ -335,6 +382,8 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request:
 | Check | What it does |
 |-------|--------------|
 | Syntax | `php -l` on every PHP file, on PHP 8.2 and 8.3 |
+| Browser test | `tests/e2e/admin_flow.py` drives Chromium through the admin with Playwright: sign in, publish and delete posts, upload photos, reports and a newsletter, post jobs, send and read a contact message. Every step is checked in the database, and it confirms that an old-style GET delete link and a POST without the CSRF token both do nothing. Screenshots are uploaded as a build artifact |
+| Docker | Builds the image, starts the Compose stack with MariaDB, loads the main pages, and checks that a PHP file placed in `uploads/` is not run |
 | Smoke test | Starts MariaDB, imports `database/nyumbani_db.sql`, serves the site with PHP's built-in server and requests every public page. Each page must return 200 with no PHP warnings or errors |
 | Access control | Checks that `admin/admin.php` redirects a signed-out visitor to the login page |
 
@@ -347,6 +396,9 @@ GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request:
 - [x] Remove duplicated code and the old `public --- copy` folder
 - [ ] Add pagination to blog and resource lists
 - [x] Automated syntax check and page smoke test on every push
+- [x] Admin actions moved from links to CSRF-protected POST forms
+- [x] End-to-end browser test of the admin panel
+- [x] Docker Compose setup
 - [ ] Deployment guide for production hosting
 
 ## Contributing

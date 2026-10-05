@@ -4,7 +4,8 @@ if (!isset($_SESSION['admin_logged_in'])) { header("Location: login.php"); exit;
 include 'db.php';
 include 'helpers.php';
 require_admin();
-if (isset($_GET['delete']) || isset($_GET['publish_id']) || isset($_GET['read'])) { csrf_check(); }
+// Every POST on this page (create, publish, delete, mark as read) must carry the CSRF token.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
 // --- HANDLE UPLOAD ---
 if (isset($_POST['save_report'])) {
@@ -19,23 +20,23 @@ if (isset($_POST['save_report'])) {
         $stmt = mysqli_prepare($conn, "INSERT INTO annual_reports (title, report_year, description, pdf_path, status, uploaded_by) VALUES (?, ?, ?, ?, ?, ?)");
         mysqli_stmt_bind_param($stmt, 'sissss', $title, $year, $desc, $db_path, $status, $uploader);
         mysqli_stmt_execute($stmt);
-        header("Location: manage_annual_reports.php?success=1");
+        header("Location: manage_annual_reports.php?success=1"); exit;
     } else {
-        header("Location: manage_annual_reports.php?error=upload");
+        header("Location: manage_annual_reports.php?error=upload"); exit;
     }
     exit;
 }
 
 // --- QUICK PUBLISH ---
-if (isset($_GET['publish_id'])) {
-    $id = (int)$_GET['publish_id'];
+if (isset($_POST['publish_id'])) {
+    $id = (int)$_POST['publish_id'];
     mysqli_query($conn, "UPDATE annual_reports SET status = 'published' WHERE id = $id");
-    header("Location: manage_annual_reports.php?updated=1");
+    header("Location: manage_annual_reports.php?updated=1"); exit;
 }
 
 // --- HANDLE DELETE ---
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
+if (isset($_POST['delete'])) {
+    $id = (int)$_POST['delete'];
     $res = mysqli_query($conn, "SELECT pdf_path FROM annual_reports WHERE id = $id");
     $file = mysqli_fetch_assoc($res);
     if ($file) delete_upload($file['pdf_path']);
@@ -99,6 +100,7 @@ $all_reports = mysqli_query($conn, "SELECT * FROM annual_reports ORDER BY report
                 <div class="admin-card">
                     <h2 style="margin-top:0;"><i class="fas fa-file-pdf" style="color:#e74c3c;"></i> Post Annual Report</h2>
                     <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="t" value="<?php echo e(csrf_token()); ?>">
                         <input type="hidden" name="status" id="postStatus" value="draft">
                         
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -158,8 +160,8 @@ $all_reports = mysqli_query($conn, "SELECT * FROM annual_reports ORDER BY report
                     <h4 style="margin:0; color:#062269;"><?php echo e($row['title']); ?></h4>
                     <small style="color:#999;">Year: <?php echo $row['report_year']; ?></small>
                     <div class="card-actions">
-                        <a href="?publish_id=<?php echo $row['id']; ?>&t=<?php echo csrf_token(); ?>" class="action-link" style="color:#27ae60;"><i class="fas fa-paper-plane"></i> Publish</a>
-                        <a href="?delete=<?php echo $row['id']; ?>&t=<?php echo csrf_token(); ?>" class="action-link" style="color:#e74c3c;" onclick="return confirm('Delete permanently?')"><i class="fas fa-trash"></i> Delete</a>
+                        <?php echo action_button(['publish_id' => $row['id']], '<i class="fas fa-paper-plane"></i> Publish', 'action-link', 'color:#27ae60;', ''); ?>
+                        <?php echo action_button(['delete' => $row['id']], '<i class="fas fa-trash"></i> Delete', 'action-link', 'color:#e74c3c;', 'Delete permanently?'); ?>
                     </div>
                 </div>
             <?php endif; endwhile; ?>
@@ -180,7 +182,7 @@ $all_reports = mysqli_query($conn, "SELECT * FROM annual_reports ORDER BY report
                     <small style="color:#999;">Year: <?php echo $row['report_year']; ?></small>
                     <div class="card-actions">
                         <a href="../<?php echo $row['pdf_path']; ?>" target="_blank" class="action-link" style="color:#4175FC;"><i class="fas fa-external-link-alt"></i> View PDF</a>
-                        <a href="?delete=<?php echo $row['id']; ?>&t=<?php echo csrf_token(); ?>" class="action-link" style="color:#e74c3c;" onclick="return confirm('Retract and delete?')"><i class="fas fa-trash"></i> Delete</a>
+                        <?php echo action_button(['delete' => $row['id']], '<i class="fas fa-trash"></i> Delete', 'action-link', 'color:#e74c3c;', 'Retract and delete?'); ?>
                     </div>
                 </div>
             <?php endif; endwhile; ?>

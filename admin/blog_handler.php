@@ -3,6 +3,7 @@ session_start();
 include 'db.php';
 include 'helpers.php';
 require_admin();
+csrf_check();
 
 if (isset($_POST['submit_blog'])) {
     $title    = trim($_POST['blog_title'] ?? '');

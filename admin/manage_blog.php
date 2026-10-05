@@ -4,17 +4,18 @@ if (!isset($_SESSION['admin_logged_in'])) { header("Location: login.php"); exit;
 include 'db.php';
 include 'helpers.php';
 require_admin();
-if (isset($_GET['delete']) || isset($_GET['publish_id']) || isset($_GET['read'])) { csrf_check(); }
+// Every POST on this page (create, publish, delete, mark as read) must carry the CSRF token.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { csrf_check(); }
 
 // --- QUICK PUBLISH & DELETE ---
-if (isset($_GET['publish_id'])) {
-    $id = (int)$_GET['publish_id'];
+if (isset($_POST['publish_id'])) {
+    $id = (int)$_POST['publish_id'];
     mysqli_query($conn, "UPDATE blog_posts SET status = 'published' WHERE id = $id");
-    header("Location: manage_blog.php?updated=1");
+    header("Location: manage_blog.php?updated=1"); exit;
 }
 
-if (isset($_GET['delete'])) {
-    $id = (int)$_GET['delete'];
+if (isset($_POST['delete'])) {
+    $id = (int)$_POST['delete'];
     $res = mysqli_query($conn, "SELECT image_path FROM blog_posts WHERE id = $id");
     $file = mysqli_fetch_assoc($res);
     if ($file) { delete_upload($file['image_path']); }
@@ -83,6 +84,7 @@ $all_posts_query = mysqli_query($conn, "SELECT * FROM blog_posts ORDER BY create
                 <div class="admin-card">
                     <h2><i class="fas fa-pen-fancy"></i> Create Blog Post</h2>
                     <form action="blog_handler.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="t" value="<?php echo e(csrf_token()); ?>">
                         <input type="hidden" name="blog_status" id="postStatus" value="draft">
                         <div style="display:flex; flex-direction:column; gap:15px;">
                             <label>Post Title</label>
@@ -135,8 +137,8 @@ $all_posts_query = mysqli_query($conn, "SELECT * FROM blog_posts ORDER BY create
                         <h4 class="mc-title"><?php echo htmlspecialchars($post['title']); ?></h4>
                     </div>
                     <div class="mc-actions">
-                        <a href="?publish_id=<?php echo $post['id']; ?>&t=<?php echo csrf_token(); ?>" class="mc-btn mc-btn-go-live"><i class="fas fa-check"></i> Go Live</a>
-                        <a href="?delete=<?php echo $post['id']; ?>&t=<?php echo csrf_token(); ?>" class="mc-btn mc-btn-delete" onclick="return confirm('Delete permanently?')"><i class="fas fa-trash"></i></a>
+                        <?php echo action_button(['publish_id' => $post['id']], '<i class="fas fa-check"></i> Go Live', 'mc-btn mc-btn-go-live', '', ''); ?>
+                        <?php echo action_button(['delete' => $post['id']], '<i class="fas fa-trash"></i>', 'mc-btn mc-btn-delete', '', 'Delete permanently?'); ?>
                     </div>
                 </div>
             <?php endif; endwhile; ?>
@@ -163,7 +165,7 @@ $all_posts_query = mysqli_query($conn, "SELECT * FROM blog_posts ORDER BY create
                     </div>
                     <div class="mc-actions">
                         <a href="../view_post.php?id=<?php echo $post['id']; ?>" target="_blank" class="mc-btn" style="background:#eee;">View</a>
-                        <a href="?delete=<?php echo $post['id']; ?>&t=<?php echo csrf_token(); ?>" class="mc-btn mc-btn-delete" onclick="return confirm('Retract post?')">Retract</a>
+                        <?php echo action_button(['delete' => $post['id']], 'Retract', 'mc-btn mc-btn-delete', '', 'Retract post?'); ?>
                     </div>
                 </div>
             <?php endif; endwhile; ?>
