@@ -2,6 +2,7 @@
 
 A PHP and MySQL website for **Nyumbani Children's Home and the Children of God Relief Institute (COGRI)** in Kenya. It presents the organisation's programmes to the public, accepts messages and donations enquiries, and includes an admin panel so staff can publish blog posts, reports, newsletters, gallery photos and job openings without touching code.
 
+[![CI](https://github.com/kinuthia-mark/Nyumbani-website-rebuild/actions/workflows/ci.yml/badge.svg)](https://github.com/kinuthia-mark/Nyumbani-website-rebuild/actions/workflows/ci.yml)
 ![PHP](https://img.shields.io/badge/PHP-8.2-777BB4?logo=php&logoColor=white)
 ![MariaDB](https://img.shields.io/badge/MariaDB-10.4-003545?logo=mariadb&logoColor=white)
 
@@ -18,8 +19,9 @@ A PHP and MySQL website for **Nyumbani Children's Home and the Children of God R
 8. [Project Structure](#project-structure)
 9. [Getting Started](#getting-started)
 10. [Security](#security)
-11. [Roadmap](#roadmap)
-12. [Contributing](#contributing)
+11. [Automated Checks](#automated-checks)
+12. [Roadmap](#roadmap)
+13. [Contributing](#contributing)
 
 ## Features
 
@@ -326,7 +328,17 @@ Upload folders are created automatically on first upload. On Linux hosting, make
 - Move admin write actions from links to POST forms
 - Take regular backups of the database and the `uploads/` folder
 
-## Roadmap
+## Automated Checks
+
+GitHub Actions (`.github/workflows/ci.yml`) runs on every push and pull request:
+
+| Check | What it does |
+|-------|--------------|
+| Syntax | `php -l` on every PHP file, on PHP 8.2 and 8.3 |
+| Smoke test | Starts MariaDB, imports `database/nyumbani_db.sql`, serves the site with PHP's built-in server and requests every public page. Each page must return 200 with no PHP warnings or errors |
+| Access control | Checks that `admin/admin.php` redirects a signed-out visitor to the login page |
+
+
 
 - [x] Public pages for programmes, resources, gallery, careers and donations
 - [x] Admin panel with draft / publish workflow
@@ -334,6 +346,7 @@ Upload folders are created automatically on first upload. On Linux hosting, make
 - [x] Security hardening (hashed passwords, prepared statements, safe uploads, CSRF tokens)
 - [x] Remove duplicated code and the old `public --- copy` folder
 - [ ] Add pagination to blog and resource lists
+- [x] Automated syntax check and page smoke test on every push
 - [ ] Deployment guide for production hosting
 
 ## Contributing

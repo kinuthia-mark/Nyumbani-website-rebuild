@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: PHP ${{ matrix.php }} syntax check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: php -l on every file
+        run: find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l
+
+  smoke-test:
+    name: Load every public page against a real database
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-root
+          MARIADB_DATABASE: nyumbani_db
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli
+          coverage: none
+
+      - name: Import the schema and starter data
+        run: mysql -h 127.0.0.1 -uroot -pci-root nyumbani_db < database/nyumbani_db.sql
+
+      - name: Point the site at the CI database
+        run: |
+          cat > admin/config.local.php <<'PHP'
+          <?php
+          $servername = '127.0.0.1';
+          $username   = 'root';
+          $password   = 'ci-root';
+          $dbname     = 'nyumbani_db';
+          PHP
+
+      - name: Start PHP's built-in server
+        run: |
+          php -S 127.0.0.1:8080 -t . > server.log 2>&1 &
+          sleep 2
+
+      # Each page must answer 200 and must not contain a PHP error.
+      - name: Request every public page
+        run: |
+          fail=0
+          for page in index about programs childrens-home lea-toto nyumbani-village \
+                      blog newsletter annual-report audit-report resources gallery \
+                      careers contact donate admin/login; do
+            code=$(curl -s -o page.html -w '%{http_code}' "http://127.0.0.1:8080/$page.php")
+            if [ "$code" != "200" ] || grep -qE "(Fatal error|Warning|Notice|Deprecated|Parse error)" page.html; then
+              echo "::error::$page.php returned $code or printed a PHP error"
+              fail=1
+            else
+              echo "ok  $page.php"
+            fi
+          done
+          exit $fail
+
+      - name: The admin dashboard redirects signed-out visitors
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/admin/admin.php)
+          test "$code" = "302"
+
+      - name: Server log
+        if: always()
+        run: cat server.log
