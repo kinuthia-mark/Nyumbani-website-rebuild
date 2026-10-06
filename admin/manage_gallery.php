@@ -102,6 +102,7 @@ require_admin();
             <p style="color: #666; margin-bottom: 20px;">Upload new photos to the public gallery page.</p>
             
             <form action="gallery_handler.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="t" value="<?php echo e(csrf_token()); ?>">
                 <div style="margin-bottom: 15px;">
                     <label>Image Caption</label>
                     <input type="text" name="caption" placeholder="e.g. Daily Life at Karen Home" required>
@@ -129,11 +130,7 @@ require_admin();
                             <img src='../".$row['image_path']."'>
                             <span class='uploader-tag'><i class='fas fa-user'></i> ".$uploaded_by."</span>
                             <p style='font-weight:600; font-size:14px; margin: 5px 0;'>".e($row['caption'])."</p>
-                            <a href='delete_photo.php?id=".$row['id']."&t=".csrf_token()."' 
-                               onclick='return confirm(\"Are you sure you want to delete this photo?\")' 
-                               style='color:#e74c3c; text-decoration:none; font-size:13px;'>
-                               <i class='fas fa-trash'></i> Delete
-                            </a>
+                            ".action_button(['id' => $row['id']], "<i class='fas fa-trash'></i> Delete", 'icon-action', 'color:#e74c3c; font-size:13px;', 'Are you sure you want to delete this photo?', 'delete_photo.php')."
                           </div>";
                 }
             } else {

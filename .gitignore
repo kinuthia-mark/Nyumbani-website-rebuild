@@ -2,3 +2,10 @@ admin/config.local.php
 .DS_Store
 Thumbs.db
 *.log
+
+# Files uploaded through the admin panel stay on the server, not in git.
+uploads/**
+!uploads/*/
+!uploads/.htaccess
+!uploads/**/.gitkeep
+!uploads/gallery/1769148828_community.jpg

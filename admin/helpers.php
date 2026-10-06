@@ -26,7 +26,7 @@ function require_admin(): void {
     }
 }
 
-/** Per-session CSRF token used on delete / publish / read links. */
+/** Per-session CSRF token sent with every delete / publish / mark-as-read form. */
 function csrf_token(): string {
     if (empty($_SESSION['csrf'])) {
         $_SESSION['csrf'] = bin2hex(random_bytes(32));
@@ -34,12 +34,40 @@ function csrf_token(): string {
     return $_SESSION['csrf'];
 }
 
+/** Stops the request unless it is a POST carrying this session's CSRF token. */
 function csrf_check(): void {
-    $sent = (string)($_GET['t'] ?? '');
+    $sent = (string)($_POST['t'] ?? '');
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        die('This action must be submitted as a form.');
+    }
     if (empty($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $sent)) {
         http_response_code(403);
         die('Invalid or expired request. Please go back, refresh the page and try again.');
     }
+}
+
+/**
+ * A one-button POST form for admin actions (delete, publish, mark as read).
+ * State-changing actions are never plain links, so a crawler, a link preview
+ * or a stray click on a copied URL cannot trigger them.
+ *
+ *   echo action_button(['delete' => 5], '<i class="fas fa-trash"></i> Delete',
+ *                      'mc-btn mc-btn-delete', '', 'Delete permanently?');
+ */
+function action_button(array $fields, string $label_html, string $class = '', string $style = '',
+                       string $confirm = '', string $action = ''): string {
+    $html = '<form method="POST" class="inline-action"'
+          . ($action !== '' ? ' action="' . e($action) . '"' : '')
+          . ($confirm !== '' ? ' onsubmit="return confirm(' . e(json_encode($confirm)) . ')"' : '')
+          . '>';
+    $html .= '<input type="hidden" name="t" value="' . e(csrf_token()) . '">';
+    foreach ($fields as $name => $value) {
+        $html .= '<input type="hidden" name="' . e($name) . '" value="' . e($value) . '">';
+    }
+    $html .= '<button type="submit"' . ($class !== '' ? ' class="' . e($class) . '"' : '')
+           . ($style !== '' ? ' style="' . e($style) . '"' : '') . '>' . $label_html . '</button>';
+    return $html . '</form>';
 }
 
 /** Only accept known values for a status / category field. */

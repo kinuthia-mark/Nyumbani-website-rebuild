@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: PHP ${{ matrix.php }} syntax check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: php -l on every file
+        run: find . -name '*.php' -not -path './.git/*' -print0 | xargs -0 -n1 php -l
+
+  smoke-test:
+    name: Load every public page against a real database
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: ci-root
+          MARIADB_DATABASE: nyumbani_db
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mysqli
+          coverage: none
+
+      - name: Import the schema and starter data
+        run: mysql -h 127.0.0.1 -uroot -pci-root nyumbani_db < database/nyumbani_db.sql
+
+      - name: Point the site at the CI database
+        run: |
+          cat > admin/config.local.php <<'PHP'
+          <?php
+          $servername = '127.0.0.1';
+          $username   = 'root';
+          $password   = 'ci-root';
+          $dbname     = 'nyumbani_db';
+          PHP
+
+      - name: Start PHP's built-in server
+        run: |
+          php -S 127.0.0.1:8080 -t . > server.log 2>&1 &
+          sleep 2
+
+      # Each page must answer 200 and must not contain a PHP error.
+      - name: Request every public page
+        run: |
+          fail=0
+          for page in index about programs childrens-home lea-toto nyumbani-village \
+                      blog newsletter annual-report audit-report resources gallery \
+                      careers contact donate admin/login; do
+            code=$(curl -s -o page.html -w '%{http_code}' "http://127.0.0.1:8080/$page.php")
+            if [ "$code" != "200" ] || grep -qE "(Fatal error|Warning|Notice|Deprecated|Parse error)" page.html; then
+              echo "::error::$page.php returned $code or printed a PHP error"
+              fail=1
+            else
+              echo "ok  $page.php"
+            fi
+          done
+          exit $fail
+
+      - name: The admin dashboard redirects signed-out visitors
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/admin/admin.php)
+          test "$code" = "302"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Drives the admin in a real browser: publish, upload, delete, read
+      # messages, and checks that forged or GET-based actions are refused.
+      - name: Browser test of the admin panel
+        env:
+          BASE_URL: http://127.0.0.1:8080
+          MYSQL_CMD: mysql -h 127.0.0.1 -uroot -pci-root nyumbani_db
+          SCREENSHOTS_DIR: e2e-screenshots
+        run: |
+          pip install playwright
+          python -m playwright install --with-deps chromium
+          python tests/e2e/admin_flow.py
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-screenshots
+          path: e2e-screenshots/
+          if-no-files-found: ignore
+
+      - name: Server log
+        if: always()
+        run: cat server.log
+
+  docker:
+    name: Docker Compose stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start
+        run: docker compose up -d --build --wait
+      - name: Pages load from the containers
+        run: |
+          curl -fs http://localhost:8080/index.php | grep -q "Nyumbani"
+          curl -fs http://localhost:8080/blog.php > /dev/null
+          curl -fs http://localhost:8080/admin/login.php | grep -qi "sign in"
+      - name: Uploaded scripts are not executed
+        run: |
+          docker compose exec -T web sh -c 'echo "<?php echo 6*7;" > /var/www/html/uploads/gallery/x.php'
+          ! curl -fs http://localhost:8080/uploads/gallery/x.php | grep -q 42
+      - name: Logs
+        if: always()
+        run: docker compose logs

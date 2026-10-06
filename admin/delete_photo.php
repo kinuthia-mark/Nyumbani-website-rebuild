@@ -5,7 +5,7 @@ include 'helpers.php';
 require_admin();
 csrf_check();
 
-$id = (int)($_GET['id'] ?? 0);
+$id = (int)($_POST['id'] ?? 0);
 
 if ($id > 0) {
     $stmt = mysqli_prepare($conn, "SELECT image_path FROM gallery WHERE id = ?");

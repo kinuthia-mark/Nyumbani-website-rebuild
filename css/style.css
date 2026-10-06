@@ -1408,3 +1408,12 @@ body {
         max-width: 200px;
     }
 }
+/* Admin action buttons: delete / publish / mark-as-read are small POST forms
+   (see action_button() in admin/helpers.php). These rules make the buttons
+   look exactly like the links they replaced. */
+.inline-action { display: inline-flex; margin: 0; }
+.inline-action button { font: inherit; cursor: pointer; border: none; }
+.inline-action button.action-link,
+.inline-action button.icon-action { background: none; padding: 0; }
+.inline-action:has(.mc-btn) { flex: 1; display: flex; }
+.inline-action .mc-btn { width: 100%; }
