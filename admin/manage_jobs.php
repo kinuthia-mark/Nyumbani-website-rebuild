@@ -37,17 +37,7 @@ if (isset($_POST['add_job'])) {
     <title>Manage Careers | Admin</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { display: flex !important; background: #f4f7f6 !important; margin: 0; text-align: left !important; font-family: 'Poppins', sans-serif; }
-        .admin-main { flex: 1; margin-left: 260px; padding: 40px; box-sizing: border-box; }
-        .admin-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        input, select { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn-save { background: #4175FC; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .job-row { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; transition: 0.3s; }
-        .job-row:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        
-        .posted-by { font-size: 11px; color: #4175FC; background: #eef2ff; padding: 2px 8px; border-radius: 4px; font-weight: 600; text-transform: capitalize; }
-    </style>
+    <link rel="stylesheet" href="../css/admin/manage_jobs.css">
 </head>
 <body>
     <?php include 'admin_sidebar.php'; ?>

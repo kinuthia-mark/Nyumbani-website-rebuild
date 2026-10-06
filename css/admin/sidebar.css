@@ -1,0 +1,135 @@
+/* Styles for admin sidebar, moved out of the page into their own file. */
+
+/* 1. The Sidebar Container */
+.admin-sidebar {
+    width: 260px;
+    background: #062269;
+    color: white;
+    padding: 25px 15px;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* 2. User Profile Styles */
+.user-profile-section {
+    display: flex;
+    align-items: center;
+    padding: 0 10px 25px 10px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: #4175FC;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-weight: bold;
+    color: white;
+    font-size: 18px;
+    text-transform: uppercase;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    text-transform: capitalize;
+}
+
+.user-status {
+    font-size: 11px;
+    color: #2ecc71;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.user-status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: #2ecc71;
+    border-radius: 50%;
+}
+
+/* 3. The Navigation Styles */
+.admin-nav-link {
+    color: #bdc3c7 !important;
+    text-decoration: none !important;
+    padding: 12px 15px; 
+    border-radius: 8px;
+    margin-bottom: 5px;
+    display: flex; 
+    align-items: center;
+    transition: 0.3s;
+    font-size: 14px;
+}
+
+.admin-nav-link i {
+    margin-right: 15px;
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.admin-nav-link:hover, 
+.admin-nav-link.active {
+    background: #4175FC !important;
+    color: white !important;
+}
+
+/* 4. Notification Badge Style */
+.msg-badge {
+    background: #ff7675;
+    color: white;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: auto;
+    font-weight: 700;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.nav-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin: 20px 0 10px 15px;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.admin-nav-container { flex: 1; }
+
+.admin-sidebar-footer {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.admin-sidebar h2 {
+    font-size: 20px;
+    margin-bottom: 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+    padding-bottom: 10px;
+    color: white !important;
+}

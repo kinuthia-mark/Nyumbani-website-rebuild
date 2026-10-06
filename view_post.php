@@ -29,30 +29,7 @@ if (!$post) {
     <title><?php echo htmlspecialchars($post['title']); ?> | Nyumbani Blog</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --primary: #062269; --accent: #4175FC; --text: #2d3436; }
-        body { font-family: 'Poppins', sans-serif; line-height: 1.8; color: var(--text); background: #fff; margin: 0; }
-        
-        .blog-container { max-width: 800px; margin: 60px auto; padding: 0 20px; }
-        
-        .back-link { text-decoration: none; color: var(--accent); font-weight: 600; display: inline-flex; align-items: center; gap: 8px; margin-bottom: 30px; transition: 0.2s; }
-        .back-link:hover { transform: translateX(-5px); }
-
-        .post-meta { color: #888; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .post-title { font-size: 2.8rem; color: var(--primary); line-height: 1.2; margin-bottom: 25px; }
-        
-        .feature-image { width: 100%; height: 450px; object-fit: cover; border-radius: 15px; margin-bottom: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        
-        .post-content { font-size: 1.15rem; color: #444; white-space: pre-line; /* Keeps paragraph breaks */ }
-        .post-content p { margin-bottom: 20px; }
-        
-        .blog-footer { margin-top: 60px; padding-top: 30px; border-top: 1px solid #eee; text-align: center; }
-        
-        @media (max-width: 768px) {
-            .post-title { font-size: 2rem; }
-            .feature-image { height: 300px; }
-        }
-    </style>
+    <link rel="stylesheet" href="css/pages/view_post.css">
 </head>
 <body>
 

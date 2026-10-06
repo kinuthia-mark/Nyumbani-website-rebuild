@@ -55,40 +55,7 @@ $all_reports = mysqli_query($conn, "SELECT * FROM annual_reports ORDER BY report
     <title>Manage Annual Reports | Nyumbani Admin</title>
     <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { display: flex !important; background: #f4f7f6 !important; margin: 0; font-family: 'Poppins', sans-serif; }
-        .admin-main { flex: 1; margin-left: 260px; padding: 40px; box-sizing: border-box; }
-        
-        .management-layout { display: grid; grid-template-columns: 1fr 350px; gap: 30px; margin-bottom: 50px; }
-        .admin-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-
-        /* Preview Card */
-        .preview-sticky { position: sticky; top: 20px; }
-        .preview-box { background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 2px dashed #4175FC; text-align: center; }
-        .preview-icon-box { background: #f0f4ff; padding: 40px; color: #27ae60; font-size: 50px; }
-        .preview-body { padding: 25px; }
-
-        /* Grid UI */
-        .section-title { color: #062269; border-bottom: 2px solid #eee; padding-bottom: 10px; margin: 40px 0 20px; display: flex; align-items: center; gap: 10px; }
-        .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-        .report-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid #eee; transition: 0.3s; position: relative; }
-        .report-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        
-        .status-tag { position: absolute; top: 15px; right: 15px; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
-        .st-draft { background: #ffeaa7; color: #d6a312; }
-        .st-published { background: #d4edda; color: #155724; }
-
-        .uploader-info { font-size: 11px; color: #4175FC; background: #eef2ff; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 10px; text-transform: capitalize; }
-
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-draft { background: #636e72; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; flex: 1; }
-        .btn-publish { background: #4175FC; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer; flex: 1; font-weight: 600; }
-        
-        .card-actions { margin-top: 15px; padding-top: 15px; border-top: 1px solid #f4f4f4; display: flex; gap: 10px; }
-        .action-link { font-size: 13px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-        
-        input, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-    </style>
+    <link rel="stylesheet" href="../css/admin/manage_annual_reports.css">
 </head>
 <body>
 

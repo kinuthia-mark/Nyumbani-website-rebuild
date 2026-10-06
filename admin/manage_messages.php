@@ -27,34 +27,7 @@ if (isset($_POST['read'])) {
     <title>Message Center | Nyumbani Admin</title>
     <link rel="stylesheet" href="../css/style.css"> 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        body { display: flex !important; background: #f4f7f6 !important; margin: 0; font-family: 'Poppins', sans-serif; }
-        .admin-main { flex: 1; margin-left: 260px; padding: 40px; box-sizing: border-box; }
-        
-        .message-card { 
-            background: white; 
-            padding: 20px; 
-            border-radius: 10px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-            margin-bottom: 20px;
-            border-left: 5px solid #bdc3c7;
-            transition: 0.3s;
-        }
-        .message-card.unread { border-left-color: #4175FC; background: #f0f4ff; }
-        
-        .msg-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-        .msg-meta { font-size: 13px; color: #666; }
-        .msg-body { color: #333; line-height: 1.6; background: #f9f9f9; padding: 15px; border-radius: 6px; }
-        
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .badge-unread { background: #4175FC; color: white; }
-        .badge-read { background: #eee; color: #777; }
-
-        .actions { margin-top: 15px; display: flex; gap: 10px; }
-        .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; text-decoration: none; font-weight: 600; }
-        .btn-read { background: #27ae60; color: white; }
-        .btn-delete { background: #e74c3c; color: white; }
-    </style>
+    <link rel="stylesheet" href="../css/admin/manage_messages.css">
 </head>
 <body>
 
