@@ -13,16 +13,7 @@ if (isset($_SESSION['admin_logged_in'])) {
     <meta charset="UTF-8">
     <title>Nyumbani Admin Login</title>
     <link rel="stylesheet" href="../css/style.css">
-    <style>
-        .login-container { height: 100vh; display: flex; align-items: center; justify-content: center; background: #f4f7f6; }
-        .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; }
-        .login-card h2 { color: #062269; margin-bottom: 20px; text-align: center; }
-        .error-msg { color: #e74c3c; background: #fdeaea; padding: 10px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; text-align: center; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 12px; background: #4175FC; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="../css/admin/login.css">
 </head>
 <body>
     <div class="login-container">

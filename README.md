@@ -258,7 +258,7 @@ erDiagram
 |-------|------------|
 | Backend | PHP 8.2, `mysqli` |
 | Database | MariaDB 10.4 (MySQL compatible) |
-| Frontend | HTML5, a single custom stylesheet (`css/style.css`) |
+| Frontend | HTML5 and plain CSS: shared styles in `css/style.css`, page and admin styles in `css/pages/` and `css/admin/` |
 | Icons and fonts | Font Awesome (CDN), Google Fonts (Poppins) |
 | Maps | Google Maps embed on the contact page |
 | Local environment | XAMPP (Apache + MariaDB + phpMyAdmin) |
@@ -283,7 +283,10 @@ Nyumbani-website-rebuild/
 ├── contact.php, send_message.php
 ├── donate.php
 ├── header.php, footer.php    # Shared layout
-├── css/style.css
+├── css/
+│   ├── style.css             # Shared site styles
+│   ├── pages/                # Styles for individual public pages (blog, resources, ...)
+│   └── admin/                # Admin panel styles: sidebar, dashboard, one file per screen
 ├── images/                   # Logos and static photos
 ├── uploads/                  # Admin-uploaded files (.htaccess blocks script execution, contents git-ignored)
 ├── admin/

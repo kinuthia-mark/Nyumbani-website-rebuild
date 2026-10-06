@@ -1,0 +1,41 @@
+/* Styles for admin/manage_newsletters.php, moved out of the page into their own file. */
+
+body { display: flex !important; background: #f4f7f6 !important; margin: 0; font-family: 'Poppins', sans-serif; }
+.admin-main { flex: 1; margin-left: 260px; padding: 40px; }
+.management-layout { display: grid; grid-template-columns: 1fr 350px; gap: 30px; margin-bottom: 50px; }
+.admin-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+
+.preview-sticky { position: sticky; top: 40px; }
+.preview-box { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border: 1px dashed #4175FC; }
+.preview-label { background: #4175FC; color: white; padding: 5px 15px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+.preview-thumb { width: 100%; height: 200px; background: #eee; object-fit: cover; display: flex; align-items: center; justify-content: center; color: #999; }
+.preview-content { padding: 20px; }
+
+.btn-group { display: flex; gap: 10px; margin-top: 20px; }
+.btn-draft { background: #636e72; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; flex: 1; }
+.btn-publish { background: #4175FC; color: white; border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; flex: 1; font-weight: bold; }
+
+.section-title { color: #062269; border-bottom: 2px solid #eee; padding-bottom: 10px; margin: 40px 0 20px; display: flex; align-items: center; gap: 10px; }
+.manage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; }
+.manage-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.3s; border: 1px solid #eee; display: flex; flex-direction: column; }
+.manage-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+.mc-thumb-box { position: relative; height: 160px; }
+.mc-thumb { width: 100%; height: 100%; object-fit: cover; }
+
+/* New Badge for Admin name */
+.admin-badge { position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.6); color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
+
+.mc-status-overlay { position: absolute; top: 10px; right: 10px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+.st-draft { background: #ffeaa7; color: #d6a312; }
+.st-published { background: #55efc4; color: #00b894; }
+
+.mc-content { padding: 20px; flex-grow: 1; }
+.mc-date { color: #999; font-size: 13px; }
+.mc-title { margin: 5px 0; font-size: 18px; color: #062269; }
+
+.mc-actions { padding: 15px; background: #f8f9fa; border-top: 1px solid #eee; display: flex; gap: 10px; }
+.mc-btn { flex: 1; text-align: center; padding: 10px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px; transition: 0.2s; }
+.mc-btn-go-live { background: #27ae60; color: white; }
+.mc-btn-delete { background: #fff; color: #e74c3c; border: 1px solid #e74c3c; }

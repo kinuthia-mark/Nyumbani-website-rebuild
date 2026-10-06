@@ -1,0 +1,18 @@
+/* Styles for blog.php, moved out of the page into their own file. */
+
+.filter-btn, .blog-info h3, .featured-content h1, .btn-read { text-align: center !important; justify-content: center !important; }
+.featured-post { position: relative; background: #062269; color: #fff; padding: 100px 0; overflow: hidden; margin-bottom: 60px; }
+.featured-content { position: relative; z-index: 2; max-width: 700px; margin: 0 auto; text-align: center; }
+.featured-badge { background: #4175FC; padding: 5px 15px; border-radius: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.featured-post h1 { font-size: 48px; color: #fff !important; margin: 20px 0; line-height: 1.2; }
+.blog-filters { display: flex; justify-content: center; gap: 12px; margin-bottom: 50px; flex-wrap: wrap; padding: 0 15px; }
+.filter-btn { background: #f4f6f9; border: 2px solid transparent; padding: 10px 25px; border-radius: 50px; font-size: 14px; cursor: pointer; transition: 0.3s; font-weight: 600; white-space: nowrap; text-align: center !important; }
+.filter-btn.active, .filter-btn:hover { background: #4175FC; color: #fff !important; border-color: #4175FC; }
+.blog-container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-bottom: 80px; }
+.blog-card { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.4s ease; display: flex; flex-direction: column; border: 1px solid #eee; }
+.blog-card:hover { transform: translateY(-10px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+.blog-img { height: 220px; background-size: cover; background-position: center; }
+.blog-info { padding: 25px; flex-grow: 1; display: flex; flex-direction: column; }
+.blog-info p { text-align: left !important; margin-bottom: 20px; color: #666; }
+.btn-read { color: #4175FC; font-weight: 700; text-decoration: none; margin-top: auto; }
